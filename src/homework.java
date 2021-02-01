@@ -1,5 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class homework {
@@ -86,7 +88,7 @@ public class homework {
 		}
 
 		public String toString(){
-			return "("+x+","+y+")"+" M="+this.m;
+			return x + "," + y;
 		}
 	}
 
@@ -100,7 +102,7 @@ public class homework {
 		Unit origin = new Unit(x, y, map[x][y]);
 
 		for (int[] site : settlingSites) {
-			System.out.println("goal: (" + site[0]+"," + site[1]+")");
+			System.out.println(origin +" --> " + site[0]+"," + site[1]);
 			// keep track of visted Units
 			int[][] visited = new int[row][col];
 			visited[x][y] = 1;
@@ -133,12 +135,36 @@ public class homework {
 				}
 			}
 
-
-			for (Unit u : parents.keySet()){
-
-				System.out.println(parents.get(u).toString() + "->" + u.toString());
-
+//			for (Unit u : parents.keySet()){
+//
+//				System.out.println(parents.get(u).toString() + "->" + u.toString());
+//
+//			}
+			
+			String output = "";
+			
+			// if queue is empty and settlers didn't make it
+			if (curr.x != site[0] || curr.y != site[1]){
+				output = "FAIL";
+			}else{
+				// back track to origin
+				while (curr != null) {
+					output = " " + curr.toString() + output;
+					curr = parents.get(curr);
+				}
+				output = output.substring(1);
 			}
+			
+			System.out.println(output);
+			
+			try {
+			      FileWriter writer = new FileWriter("output.txt");
+			      writer.write(output);
+			      writer.close();
+			    } catch (IOException e) {
+			      System.out.println("An error occurred.");
+			      e.printStackTrace();
+			    }	
 		}
 
 	}
