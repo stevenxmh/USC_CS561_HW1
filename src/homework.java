@@ -7,9 +7,9 @@ import java.util.*;
 public class homework {
 
 	static int[][] directions = {
-		{-1, -1}, {-1, 0}, {-1, 1},
-		{0, -1}, {0, 1},
-		{1, -1}, {1, 0}, {1, 1}
+			{-1, -1}, {-1, 0}, {-1, 1},
+			{0, -1}, {0, 1},
+			{1, -1}, {1, 0}, {1, 1}
 	};
 
 	public static void main(String[] args) {
@@ -60,14 +60,31 @@ public class homework {
 			}
 		}
 
-		if (algorithm.equals("BFS")){  	
-			bfs(row, col, x, y, maxHeight, settlingSites, map);
-		}else if (algorithm.equals("UCS")){
-			ucs(row, col, x, y, maxHeight, settlingSites, map);
-		}else{
-			aStar(row, col, x, y, maxHeight, settlingSites, map);
-		}
+		List<String> output = new ArrayList<String>();
 
+		if (algorithm.equals("BFS")){  	
+			output = bfs(row, col, x, y, maxHeight, settlingSites, map);
+		}else if (algorithm.equals("UCS")){
+			output = ucs(row, col, x, y, maxHeight, settlingSites, map);
+		}else{
+			output = aStar(row, col, x, y, maxHeight, settlingSites, map);
+		}
+		
+		try {
+			FileWriter writer = new FileWriter("output.txt");
+			for (String s : output) {
+				if (output.indexOf(s) != output.size()-1) {
+					writer.write(s+"\r");
+				}else {
+					writer.write(s);
+				}
+				
+			}
+			writer.close();
+		} catch (IOException e) {
+			System.out.println("An error occurred.");
+			e.printStackTrace();
+		}	
 	}
 
 	/*
@@ -95,10 +112,10 @@ public class homework {
 	/*
 	 * Print out a BFS path into output.txt
 	 */
-	private static void bfs(int row, int col, int x, int y, int maxHeight,
+	private static List<String> bfs(int row, int col, int x, int y, int maxHeight,
 			int[][] settlingSites, int[][] map) {
 		System.out.println("BFS implementation:");
-
+		List<String> result = new ArrayList<>();
 		Unit origin = new Unit(x, y, map[x][y]);
 
 		for (int[] site : settlingSites) {
@@ -135,14 +152,14 @@ public class homework {
 				}
 			}
 
-//			for (Unit u : parents.keySet()){
-//
-//				System.out.println(parents.get(u).toString() + "->" + u.toString());
-//
-//			}
-			
+			//			for (Unit u : parents.keySet()){
+			//
+			//				System.out.println(parents.get(u).toString() + "->" + u.toString());
+			//
+			//			}
+
 			String output = "";
-			
+
 			// if queue is empty and settlers didn't make it
 			if (curr.x != site[0] || curr.y != site[1]){
 				output = "FAIL";
@@ -154,30 +171,23 @@ public class homework {
 				}
 				output = output.substring(1);
 			}
-			
-			System.out.println(output);
-			
-			try {
-			      FileWriter writer = new FileWriter("output.txt");
-			      writer.write(output);
-			      writer.close();
-			    } catch (IOException e) {
-			      System.out.println("An error occurred.");
-			      e.printStackTrace();
-			    }	
-		}
 
+			result.add(output);
+		}
+		
+		return result;
 	}
 
-	private static void ucs(int row, int col, int x, int y, int maxHeight,
+	private static List<String> ucs(int row, int col, int x, int y, int maxHeight,
 			int[][] settlingSites, int[][] map) {
 		System.out.println("USC");
-
+		return null;
 	}
 
-	private static void aStar(int row, int col, int x, int y, int maxHeight,
+	private static List<String> aStar(int row, int col, int x, int y, int maxHeight,
 			int[][] settlingSites, int[][] map) {
 		System.out.println("A*");
+		return null;
 
 	}
 
