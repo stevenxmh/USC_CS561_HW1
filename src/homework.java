@@ -93,12 +93,12 @@ public class homework {
 	 *  y: col
 	 *  m: Height/Muddiness
 	 */
-	static class Unit {
+	static class Cell {
 		int x;
 		int y;
 		int m;
 
-		public Unit (int x, int y, int m){
+		public Cell (int x, int y, int m){
 			this.x = x;
 			this.y = y;
 			this.m = m;
@@ -116,20 +116,20 @@ public class homework {
 			int[][] settlingSites, int[][] map) {
 		// System.out.println("BFS implementation:");
 		List<String> result = new ArrayList<>();
-		Unit origin = new Unit(x, y, map[x][y]);
+		Cell origin = new Cell(x, y, map[x][y]);
 
 		for (int[] site : settlingSites) {
 			// System.out.println(origin +" --> " + site[0]+"," + site[1]);
-			// keep track of visted Units
+			// keep track of visted Cells
 			int[][] visited = new int[row][col];
 			visited[x][y] = 1;
-			// Track prev visted Unit
-			Map<Unit, Unit> parents = new HashMap<>();
-			Queue<Unit> queue = new LinkedList<>();
+			// Track prev visted Cell
+			Map<Cell, Cell> parents = new HashMap<>();
+			Queue<Cell> queue = new LinkedList<>();
 			queue.add(origin);
 
-			// track last visted Unit 
-			Unit curr = queue.peek();
+			// track last visted Cell 
+			Cell curr = queue.peek();
 
 			while(!queue.isEmpty()){
 				curr = queue.remove();
@@ -140,10 +140,10 @@ public class homework {
 					if (curr.x + d[0] >= 0 && curr.x + d[0] <= row-1 && curr.y + d[1] >= 0 && curr.y + d[1] <= col-1){
 						// check if the next vertex is visited and can be moved to
 						if (visited[curr.x+d[0]][curr.y+d[1]] == 0 && canMove(map, maxHeight, curr.x, curr.y, curr.x+d[0], curr.y+d[1])){
-							// Create the adjacent Unit and enqueue
-							Unit next = new Unit(curr.x+d[0], curr.y+d[1], map[curr.x+d[0]][curr.y+d[1]]);
+							// Create the adjacent Cell and enqueue
+							Cell next = new Cell(curr.x+d[0], curr.y+d[1], map[curr.x+d[0]][curr.y+d[1]]);
 							queue.add(next);
-							// mark curr Unit as the parent of the next Unit
+							// mark curr Cell as the parent of the next Cell
 							parents.put(next, curr);
 							// mark next as visited
 							visited[curr.x+d[0]][curr.y+d[1]] = 1;
@@ -152,7 +152,7 @@ public class homework {
 				}
 			}
 
-			//			for (Unit u : parents.keySet()){
+			//			for (Cell u : parents.keySet()){
 			//
 			//				System.out.println(parents.get(u).toString() + "->" + u.toString());
 			//
