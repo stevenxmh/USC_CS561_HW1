@@ -12,7 +12,7 @@ public class homework {
 
 	public static void main(String[] args) {
 		/*
-		 * Store input.txt into String List
+		 * Store input.txt into String List 
 		 * Grader input is always valid 
 		 */
 		List<String> inputs = new ArrayList<>();
