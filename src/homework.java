@@ -69,7 +69,7 @@ public class homework {
 		}else{
 			output = aStar(row, col, x, y, maxHeight, settlingSites, map);
 		}
-		
+
 		try {
 			FileWriter writer = new FileWriter("output.txt");
 			for (String s : output) {
@@ -78,7 +78,7 @@ public class homework {
 				}else {
 					writer.write(s);
 				}
-				
+
 			}
 			writer.close();
 		} catch (IOException e) {
@@ -114,12 +114,12 @@ public class homework {
 	 */
 	private static List<String> bfs(int row, int col, int x, int y, int maxHeight,
 			int[][] settlingSites, int[][] map) {
-		System.out.println("BFS implementation:");
+		// System.out.println("BFS implementation:");
 		List<String> result = new ArrayList<>();
 		Unit origin = new Unit(x, y, map[x][y]);
 
 		for (int[] site : settlingSites) {
-			System.out.println(origin +" --> " + site[0]+"," + site[1]);
+			// System.out.println(origin +" --> " + site[0]+"," + site[1]);
 			// keep track of visted Units
 			int[][] visited = new int[row][col];
 			visited[x][y] = 1;
@@ -174,7 +174,7 @@ public class homework {
 
 			result.add(output);
 		}
-		
+
 		return result;
 	}
 
