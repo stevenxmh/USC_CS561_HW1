@@ -109,7 +109,7 @@ public class homework {
 			Queue<Unit> queue = new LinkedList<>();
 			queue.add(origin);
 
-			// track last visted Unit
+			// track last visted Unit 
 			Unit curr = queue.peek();
 
 			while(!queue.isEmpty()){
