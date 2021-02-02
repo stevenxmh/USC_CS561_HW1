@@ -8,8 +8,14 @@ public class homework {
 
 	static int[][] directions = {
 			{-1, -1}, {-1, 0}, {-1, 1},
-			{0, -1}, {0, 1},
+			{0, -1},         {0, 1},
 			{1, -1}, {1, 0}, {1, 1}
+	};
+
+	static int[] moveCosts = {
+			14, 10, 14,
+			10,     10,
+			14, 10, 14
 	};
 
 	public static void main(String[] args) {
@@ -28,7 +34,7 @@ public class homework {
 			}
 			scan.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("error");
+			System.out.println("input error");
 			e.printStackTrace();
 		}
 
@@ -82,7 +88,7 @@ public class homework {
 			}
 			writer.close();
 		} catch (IOException e) {
-			System.out.println("An error occurred.");
+			System.out.println("output error.");
 			e.printStackTrace();
 		}	
 	}
@@ -97,16 +103,34 @@ public class homework {
 		int x;
 		int y;
 		int m;
+		int cost;
 
 		public Cell (int x, int y, int m){
 			this.x = x;
 			this.y = y;
 			this.m = m;
+			this.cost = 0;
 		}
-
+		
+		public Cell (int x, int y, int m, int cost){
+			this.x = x;
+			this.y = y;
+			this.m = m;
+			this.cost = cost;
+		}
+		
 		public String toString(){
 			return x + "," + y;
 		}
+	}
+
+	static class CellComparator implements Comparator<Cell>{
+
+		@Override
+		public int compare(homework.Cell c1, homework.Cell c2) {
+			return c1.cost - c2.cost;
+		}
+
 	}
 
 	/*
@@ -118,6 +142,7 @@ public class homework {
 		List<String> result = new ArrayList<>();
 		Cell origin = new Cell(x, y, map[x][y]);
 
+		// Generate one output for each settlement
 		for (int[] site : settlingSites) {
 			// System.out.println(origin +" --> " + site[0]+"," + site[1]);
 			// keep track of visted Cells
@@ -180,8 +205,83 @@ public class homework {
 
 	private static List<String> ucs(int row, int col, int x, int y, int maxHeight,
 			int[][] settlingSites, int[][] map) {
-		System.out.println("USC");
-		return null;
+		System.out.println("UCS:");
+
+		List<String> result = new ArrayList<>();
+		Cell origin = new Cell(x, y, map[x][y]);
+
+		for (int[] site : settlingSites) {
+			int[][] visited = new int[row][col];
+			visited[x][y] = 1;
+
+			Map<Cell, Cell> parents = new HashMap<>();
+			Queue<Cell> queue = new PriorityQueue<>(new CellComparator());
+			// memo to keep the pointers of Cell objects to update the cost
+			Cell[][] memo = new Cell[row][col];
+			memo[x][y] = origin;
+//			Cell a = new Cell(0,0,5,5);
+//			Cell b = new Cell(1,1,10,10);
+//			Cell c = new Cell(2,2,15,15);
+//			queue.add(a);
+//			queue.add(b);
+//			queue.add(c);
+//
+//			while (!queue.isEmpty()) {
+//				Cell curr = queue.poll();
+//				System.out.println(curr.cost);
+//			}
+
+			queue.add(origin);
+
+			// track last visted Cell 
+			Cell curr = queue.peek();
+			
+			while(!queue.isEmpty()){
+				// remove head and mark as visited
+				curr = queue.poll();
+				visited[curr.x][curr.y] = 1;
+				
+				// break if at goal state
+				if (curr.x == site[0] && curr.y == site[1]) break;
+				
+				for (int[] d : directions){
+					// check inbound
+					if (curr.x + d[0] >= 0 && curr.x + d[0] <= row-1 && curr.y + d[1] >= 0 && curr.y + d[1] <= col-1){
+						// calculate the weight
+						int weight = 10;
+						if (Math.abs(d[0])+Math.abs(d[1]) == 2) {
+							// weight is 14 if path is diagonal
+							weight = 14;
+						}
+						// if unvisited and not blocked
+						if (visited[curr.x+d[0]][curr.y+d[1]] == 0 && canMove(map, maxHeight, curr.x, curr.y, curr.x+d[0], curr.y+d[1])){
+							
+							// if the adjacent cell was queued
+							if (memo[curr.x+d[0]][curr.y+d[1]] != null) {
+								// if the new path is cheaper
+								if (memo[curr.x+d[0]][curr.y+d[1]].cost > curr.cost + weight ) {
+									// update the cost and point parent to the curr cell
+									memo[curr.x+d[0]][curr.y+d[1]].cost = curr.cost + weight;
+									parents.put(memo[curr.x+d[0]][curr.y+d[1]], curr);
+								}
+								// else ignore this path
+							}else { // the adjacent cell was not queued
+								// Create the adjacent Cell with cost and enqueue
+								Cell next = new Cell(curr.x+d[0], curr.y+d[1], map[curr.x+d[0]][curr.y+d[1]], curr.cost + weight);
+								queue.add(next);
+								// mark curr Cell as the parent of the next Cell
+								parents.put(next, curr);
+								memo[curr.x+d[0]][curr.y+d[1]] = next;
+							}
+						}
+					}
+				}
+			}
+			
+
+		}
+
+		return result;
 	}
 
 	private static List<String> aStar(int row, int col, int x, int y, int maxHeight,
