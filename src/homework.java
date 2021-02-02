@@ -141,7 +141,8 @@ public class homework {
 	 */
 	private static List<String> bfs(int row, int col, int r, int c, int maxHeight,
 			int[][] settlingSites, int[][] map) {
-		// System.out.println("BFS implementation:");
+
+		
 		List<String> result = new ArrayList<>();
 		Cell origin = new Cell(r, c, map[r][c]);
 
@@ -209,7 +210,6 @@ public class homework {
 
 	private static List<String> ucs(int row, int col, int x, int y, int maxHeight,
 			int[][] settlingSites, int[][] map) {
-		System.out.println("UCS:");
 
 		List<String> result = new ArrayList<>();
 		Cell origin = new Cell(x, y, map[x][y]);
@@ -223,17 +223,6 @@ public class homework {
 			// memo to keep the pointers of Cell objects to update the cost
 			Cell[][] memo = new Cell[row][col];
 			memo[x][y] = origin;
-			//			Cell a = new Cell(0,0,5,5);
-			//			Cell b = new Cell(1,1,10,10);
-			//			Cell c = new Cell(2,2,15,15);
-			//			queue.add(a);
-			//			queue.add(b);
-			//			queue.add(c);
-			//
-			//			while (!queue.isEmpty()) {
-			//				Cell curr = queue.poll();
-			//				System.out.println(curr.cost);
-			//			}
 
 			queue.add(origin);
 
@@ -304,13 +293,17 @@ public class homework {
 		return result;
 	}
 
-	private static List<String> aStar(int row, int col, int x, int y, int maxHeight,
+	private static List<String> aStar(int row, int col, int r, int c, int maxHeight,
 			int[][] settlingSites, int[][] map) {
 		System.out.println("A*");
 		return null;
 
 	}
 
+	/*
+	 * Compare the height difference between 2 cells with maxHeight
+	 * return true if wagon can be moved from (x, y) to (r, c) which are row-column pairs
+	 */
 	private static boolean canMove(int[][] map, int maxHeight, int x, int y, int r, int c) {
 		int originHeight = map[x][y] < 0 ? Math.abs(map[x][y]) : 0;
 		int targetHeight = map[r][c] < 0 ? Math.abs(map[r][c]) : 0;
