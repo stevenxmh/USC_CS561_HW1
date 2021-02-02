@@ -12,12 +12,6 @@ public class homework {
 			{1, -1}, {1, 0}, {1, 1}
 	};
 
-	static int[] moveCosts = {
-			14, 10, 14,
-			10,     10,
-			14, 10, 14
-	};
-
 	public static void main(String[] args) {
 		/*
 		 * Store input.txt into String List 
@@ -46,15 +40,19 @@ public class homework {
 		int col = Integer.valueOf((inputs.get(1).split(" ")[0]));
 		int row = Integer.valueOf((inputs.get(1).split(" ")[1]));
 
-		int x = Integer.valueOf((inputs.get(2).split(" ")[0]));
-		int y = Integer.valueOf((inputs.get(2).split(" ")[1]));
+		// start state col and row
+		int c = Integer.valueOf((inputs.get(2).split(" ")[0]));
+		int r = Integer.valueOf((inputs.get(2).split(" ")[1]));
 
 		int maxHeight = Integer.valueOf(inputs.get(3));
 		int numOfSites = Integer.valueOf(inputs.get(4));
 		int[][] settlingSites = new int[numOfSites][2];
 		for (int i = 0; i < numOfSites; i ++) {
-			settlingSites[i][0] = Integer.valueOf((inputs.get(5+i).split(" ")[0]));
-			settlingSites[i][1] = Integer.valueOf((inputs.get(5+i).split(" ")[1]));;
+			// col
+			settlingSites[i][1] = Integer.valueOf((inputs.get(5+i).split(" ")[0]));;
+			// row
+			settlingSites[i][0] = Integer.valueOf((inputs.get(5+i).split(" ")[1]));
+
 		}
 
 		int map_index = 5 + numOfSites;
@@ -69,11 +67,11 @@ public class homework {
 		List<String> output = new ArrayList<String>();
 
 		if (algorithm.equals("BFS")){  	
-			output = bfs(row, col, x, y, maxHeight, settlingSites, map);
+			output = bfs(row, col, r, c, maxHeight, settlingSites, map);
 		}else if (algorithm.equals("UCS")){
-			output = ucs(row, col, x, y, maxHeight, settlingSites, map);
+			output = ucs(row, col, r, c, maxHeight, settlingSites, map);
 		}else{
-			output = aStar(row, col, x, y, maxHeight, settlingSites, map);
+			output = aStar(row, col, r, c, maxHeight, settlingSites, map);
 		}
 
 		try {
@@ -95,35 +93,40 @@ public class homework {
 
 	/*
 	 *  Object represent each cell in the map
-	 *  x: row
-	 *  y: col
+	 *  r: row
+	 *  c: col
 	 *  m: Height/Muddiness
+	 *  cost: the cost from start state to the cell
 	 */
 	static class Cell {
-		int x;
-		int y;
+		int r;
+		int c;
 		int m;
 		int cost;
 
 		public Cell (int x, int y, int m){
-			this.x = x;
-			this.y = y;
+			this.r = x;
+			this.c = y;
 			this.m = m;
 			this.cost = 0;
 		}
-		
+
 		public Cell (int x, int y, int m, int cost){
-			this.x = x;
-			this.y = y;
+			this.r = x;
+			this.c = y;
 			this.m = m;
 			this.cost = cost;
 		}
-		
+
+		// print out in the format of c,r
 		public String toString(){
-			return x + "," + y;
+			return c + "," + r;
 		}
 	}
 
+	/*
+	 * Comparator for Class Cell, order Cell in increasing cost order
+	 */
 	static class CellComparator implements Comparator<Cell>{
 
 		@Override
@@ -136,18 +139,18 @@ public class homework {
 	/*
 	 * Print out a BFS path into output.txt
 	 */
-	private static List<String> bfs(int row, int col, int x, int y, int maxHeight,
+	private static List<String> bfs(int row, int col, int r, int c, int maxHeight,
 			int[][] settlingSites, int[][] map) {
 		// System.out.println("BFS implementation:");
 		List<String> result = new ArrayList<>();
-		Cell origin = new Cell(x, y, map[x][y]);
+		Cell origin = new Cell(r, c, map[r][c]);
 
 		// Generate one output for each settlement
 		for (int[] site : settlingSites) {
 			// System.out.println(origin +" --> " + site[0]+"," + site[1]);
 			// keep track of visted Cells
 			int[][] visited = new int[row][col];
-			visited[x][y] = 1;
+			visited[r][c] = 1;
 			// Track prev visted Cell
 			Map<Cell, Cell> parents = new HashMap<>();
 			Queue<Cell> queue = new LinkedList<>();
@@ -158,20 +161,20 @@ public class homework {
 
 			while(!queue.isEmpty()){
 				curr = queue.remove();
-				if (curr.x == site[0] && curr.y == site[1]) break;
+				if (curr.r == site[0] && curr.c == site[1]) break;
 				// add adjacent vertex that are unvisited and valid into queue
 				for (int[] d : directions){
 					// check if the next vertex is in bound
-					if (curr.x + d[0] >= 0 && curr.x + d[0] <= row-1 && curr.y + d[1] >= 0 && curr.y + d[1] <= col-1){
+					if (curr.r + d[0] >= 0 && curr.r + d[0] <= row-1 && curr.c + d[1] >= 0 && curr.c + d[1] <= col-1){
 						// check if the next vertex is visited and can be moved to
-						if (visited[curr.x+d[0]][curr.y+d[1]] == 0 && canMove(map, maxHeight, curr.x, curr.y, curr.x+d[0], curr.y+d[1])){
+						if (visited[curr.r+d[0]][curr.c+d[1]] == 0 && canMove(map, maxHeight, curr.r, curr.c, curr.r+d[0], curr.c+d[1])){
 							// Create the adjacent Cell and enqueue
-							Cell next = new Cell(curr.x+d[0], curr.y+d[1], map[curr.x+d[0]][curr.y+d[1]]);
+							Cell next = new Cell(curr.r+d[0], curr.c+d[1], map[curr.r+d[0]][curr.c+d[1]]);
 							queue.add(next);
 							// mark curr Cell as the parent of the next Cell
 							parents.put(next, curr);
 							// mark next as visited
-							visited[curr.x+d[0]][curr.y+d[1]] = 1;
+							visited[curr.r+d[0]][curr.c+d[1]] = 1;
 						}
 					}
 				}
@@ -183,10 +186,11 @@ public class homework {
 			//
 			//			}
 
+			// Generate output
 			String output = "";
 
 			// if queue is empty and settlers didn't make it
-			if (curr.x != site[0] || curr.y != site[1]){
+			if (curr.r != site[0] || curr.c != site[1]){
 				output = "FAIL";
 			}else{
 				// back track to origin
@@ -219,34 +223,34 @@ public class homework {
 			// memo to keep the pointers of Cell objects to update the cost
 			Cell[][] memo = new Cell[row][col];
 			memo[x][y] = origin;
-//			Cell a = new Cell(0,0,5,5);
-//			Cell b = new Cell(1,1,10,10);
-//			Cell c = new Cell(2,2,15,15);
-//			queue.add(a);
-//			queue.add(b);
-//			queue.add(c);
-//
-//			while (!queue.isEmpty()) {
-//				Cell curr = queue.poll();
-//				System.out.println(curr.cost);
-//			}
+			//			Cell a = new Cell(0,0,5,5);
+			//			Cell b = new Cell(1,1,10,10);
+			//			Cell c = new Cell(2,2,15,15);
+			//			queue.add(a);
+			//			queue.add(b);
+			//			queue.add(c);
+			//
+			//			while (!queue.isEmpty()) {
+			//				Cell curr = queue.poll();
+			//				System.out.println(curr.cost);
+			//			}
 
 			queue.add(origin);
 
 			// track last visted Cell 
 			Cell curr = queue.peek();
-			
+
 			while(!queue.isEmpty()){
 				// remove head and mark as visited
 				curr = queue.poll();
-				visited[curr.x][curr.y] = 1;
-				
+				visited[curr.r][curr.c] = 1;
+
 				// break if at goal state
-				if (curr.x == site[0] && curr.y == site[1]) break;
-				
+				if (curr.r == site[0] && curr.c == site[1]) break;
+
 				for (int[] d : directions){
 					// check inbound
-					if (curr.x + d[0] >= 0 && curr.x + d[0] <= row-1 && curr.y + d[1] >= 0 && curr.y + d[1] <= col-1){
+					if (curr.r + d[0] >= 0 && curr.r + d[0] <= row-1 && curr.c + d[1] >= 0 && curr.c + d[1] <= col-1){
 						// calculate the weight
 						int weight = 10;
 						if (Math.abs(d[0])+Math.abs(d[1]) == 2) {
@@ -254,30 +258,46 @@ public class homework {
 							weight = 14;
 						}
 						// if unvisited and not blocked
-						if (visited[curr.x+d[0]][curr.y+d[1]] == 0 && canMove(map, maxHeight, curr.x, curr.y, curr.x+d[0], curr.y+d[1])){
-							
+						if (visited[curr.r+d[0]][curr.c+d[1]] == 0 && canMove(map, maxHeight, curr.r, curr.c, curr.r+d[0], curr.c+d[1])){
+
 							// if the adjacent cell was queued
-							if (memo[curr.x+d[0]][curr.y+d[1]] != null) {
+							if (memo[curr.r+d[0]][curr.c+d[1]] != null) {
 								// if the new path is cheaper
-								if (memo[curr.x+d[0]][curr.y+d[1]].cost > curr.cost + weight ) {
+								if (memo[curr.r+d[0]][curr.c+d[1]].cost > curr.cost + weight ) {
 									// update the cost and point parent to the curr cell
-									memo[curr.x+d[0]][curr.y+d[1]].cost = curr.cost + weight;
-									parents.put(memo[curr.x+d[0]][curr.y+d[1]], curr);
+									memo[curr.r+d[0]][curr.c+d[1]].cost = curr.cost + weight;
+									parents.put(memo[curr.r+d[0]][curr.c+d[1]], curr);
 								}
 								// else ignore this path
 							}else { // the adjacent cell was not queued
 								// Create the adjacent Cell with cost and enqueue
-								Cell next = new Cell(curr.x+d[0], curr.y+d[1], map[curr.x+d[0]][curr.y+d[1]], curr.cost + weight);
+								Cell next = new Cell(curr.r+d[0], curr.c+d[1], map[curr.r+d[0]][curr.c+d[1]], curr.cost + weight);
 								queue.add(next);
 								// mark curr Cell as the parent of the next Cell
 								parents.put(next, curr);
-								memo[curr.x+d[0]][curr.y+d[1]] = next;
+								memo[curr.r+d[0]][curr.c+d[1]] = next;
 							}
 						}
 					}
 				}
 			}
-			
+
+			// Generate output
+			String output = "";
+
+			// if queue is empty and settlers didn't make it
+			if (curr.r != site[0] || curr.c != site[1]){
+				output = "FAIL";
+			}else{
+				// back track to origin
+				while (curr != null) {
+					output = " " + curr.toString() + output;
+					curr = parents.get(curr);
+				}
+				output = output.substring(1);
+			}
+
+			result.add(output);
 
 		}
 
