@@ -97,18 +97,21 @@ public class homework {
 	 *  c: col
 	 *  m: Height/Muddiness
 	 *  cost: the cost from start state to the cell
+	 *  h: heuristic value
 	 */
 	static class Cell {
 		int r;
 		int c;
 		int m;
 		int cost;
+		int h;
 
 		public Cell (int x, int y, int m){
 			this.r = x;
 			this.c = y;
 			this.m = m;
 			this.cost = 0;
+			this.h = 0;
 		}
 
 		public Cell (int x, int y, int m, int cost){
@@ -116,8 +119,17 @@ public class homework {
 			this.c = y;
 			this.m = m;
 			this.cost = cost;
+			this.h = 0;
 		}
-
+		
+		public Cell (int x, int y, int m, int cost, int h){
+			this.r = x;
+			this.c = y;
+			this.m = m;
+			this.cost = cost;
+			this.h = h;
+		}
+		
 		// print out in the format of c,r
 		public String toString(){
 			return c + "," + r;
@@ -135,14 +147,27 @@ public class homework {
 		}
 
 	}
+	
+	/*
+	 * Comparator for Class Cell, order Cell in increasing f(n) order
+	 * Compare the value of cost + estimated cost = g(n) + h(n) 
+	 */
+	static class CellAstarComparator implements Comparator<Cell>{
+		
+		@Override
+		public int compare(homework.Cell c1, homework.Cell c2) {
+			return (c1.h + c1.cost) - (c2.h + c2.cost);
+		}
 
+	}
+	
 	/*
 	 * Print out a BFS path into output.txt
 	 */
 	private static List<String> bfs(int row, int col, int r, int c, int maxHeight,
 			int[][] settlingSites, int[][] map) {
 
-		
+
 		List<String> result = new ArrayList<>();
 		Cell origin = new Cell(r, c, map[r][c]);
 
@@ -208,27 +233,27 @@ public class homework {
 		return result;
 	}
 
-	private static List<String> ucs(int row, int col, int x, int y, int maxHeight,
+	private static List<String> ucs(int row, int col, int r, int c, int maxHeight,
 			int[][] settlingSites, int[][] map) {
 
 		List<String> result = new ArrayList<>();
-		Cell origin = new Cell(x, y, map[x][y]);
+		Cell origin = new Cell(r, c, map[r][c]);
 
 		for (int[] site : settlingSites) {
 			int[][] visited = new int[row][col];
-			visited[x][y] = 1;
+			visited[r][c] = 1;
 
 			Map<Cell, Cell> parents = new HashMap<>();
 			Queue<Cell> queue = new PriorityQueue<>(new CellComparator());
 			// memo to keep the pointers of Cell objects to update the cost
 			Cell[][] memo = new Cell[row][col];
-			memo[x][y] = origin;
+			memo[r][c] = origin;
 
 			queue.add(origin);
 
 			// track last visted Cell 
 			Cell curr = queue.peek();
-
+			
 			while(!queue.isEmpty()){
 				// remove head and mark as visited
 				curr = queue.poll();
@@ -252,10 +277,14 @@ public class homework {
 							// if the adjacent cell was queued
 							if (memo[curr.r+d[0]][curr.c+d[1]] != null) {
 								// if the new path is cheaper
-								if (memo[curr.r+d[0]][curr.c+d[1]].cost > curr.cost + weight ) {
+								Cell next = memo[curr.r+d[0]][curr.c+d[1]];
+								if (next.cost > curr.cost + weight ) {
 									// update the cost and point parent to the curr cell
-									memo[curr.r+d[0]][curr.c+d[1]].cost = curr.cost + weight;
-									parents.put(memo[curr.r+d[0]][curr.c+d[1]], curr);
+									next.cost = curr.cost + weight;
+									parents.put(next, curr);
+									// Rearrange the priority queue
+									queue.remove(next);
+									queue.add(next);
 								}
 								// else ignore this path
 							}else { // the adjacent cell was not queued
@@ -293,10 +322,63 @@ public class homework {
 		return result;
 	}
 
+	/* Cost: g(n) = moving cost + mud level + height change
+	 * Heuristic: h(n) = straight line distance. i.e. h((0,0) -> (2,1)) = (int) sqrt ( |2-0|^2 + |1-0|^2 ) ~= 22
+	 * Since the shortest moving cost, regardless of mud and height costs, from (0,0) -> (2,1) is 14 + 10 = 24 
+	 * so my h(n) <= true cost
+	 * A*: Queue ordered by F(n) = g(n) + h(n)
+	 */
 	private static List<String> aStar(int row, int col, int r, int c, int maxHeight,
 			int[][] settlingSites, int[][] map) {
 		System.out.println("A*");
-		return null;
+		List<String> result = new ArrayList<>();
+
+
+		for (int[] site : settlingSites) {
+			
+			// start state has no cost and h(n) -> goal state
+			int h = getHeuristic(r,c,site[0],site[1]);
+			Cell origin = new Cell(r, c, map[r][c], 0, h);
+			
+			// mark start state as visited
+			int[][] visited = new int[row][col];
+			visited[r][c] = 1;
+			// keep track of parents
+			Map<Cell, Cell> parents = new HashMap<>();
+			// queue is order by f(n) = g(n) + h(n)
+			Queue<Cell> queue = new PriorityQueue<>(new CellAstarComparator());
+			// memo to track the cell pointer to update cost
+			Cell[][] memo = new Cell[row][col];
+			memo[r][c] = origin;
+
+			queue.add(origin);
+
+			Cell curr;
+			
+			while (!queue.isEmpty()) {
+				curr = queue.poll();
+
+			}
+			
+			// Generate output
+			String output = "";
+
+			// if queue is empty and settlers didn't make it
+//			if (curr.r != site[0] || curr.c != site[1]){
+//				output = "FAIL";
+//			}else{
+//				// back track to origin
+//				while (curr != null) {
+//					output = " " + curr.toString() + output;
+//					curr = parents.get(curr);
+//				}
+//				output = output.substring(1);
+//			}
+
+			result.add(output);
+		}
+
+		return result;
 
 	}
 
@@ -308,6 +390,16 @@ public class homework {
 		int originHeight = map[x][y] < 0 ? Math.abs(map[x][y]) : 0;
 		int targetHeight = map[r][c] < 0 ? Math.abs(map[r][c]) : 0;
 		return Math.abs(originHeight - targetHeight) <= maxHeight;
+	}
+	
+	/*
+	 * Compute the straight line distance from (x,y) to (r,c)
+	 * Each vertical or horizontal unit distance is 10
+	 */
+	private static int getHeuristic(int x, int y, int r, int c) {
+		int vertical = 10 * Math.abs(r - x);
+		int horizontal = 10 * Math.abs(c - y) ;
+		return (int) Math.sqrt((vertical * vertical) + (horizontal * horizontal));
 	}
 
 }
